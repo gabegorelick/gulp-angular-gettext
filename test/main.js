@@ -8,64 +8,94 @@ var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');
 
-
+var fixturesDir = __dirname + '/fixtures';
 
 describe('gulp-angular-gettext', function () {
   describe('extract()', function () {
-    var createFile = function (contents) {
-      var base = path.normalize(__dirname + '/fixtures');
-      return new gutil.File({
-        path: path.join(base, 'partial.html'),
-        base: base,
-        cwd: __dirname,
-        contents: contents
+
+    var relativizeHeaders = function (po) {
+      po.items.forEach(function (item) {
+        item.references = item.references.map(function (ref) {
+          return path.relative(path.join(__dirname, 'fixtures'), ref)
+            .replace(/\\/g, '/'); // replace any Windows-style paths
+        });
       });
     };
 
-    it('should match angular-gettext output', function (done) {
-      fs.readFile(__dirname + '/fixtures/partial.html', function (err, partial) {
-        if (err) {
-          done(err);
-          return;
-        }
-
-        extract({
-          postProcess: function (po) {
-            po.items.forEach(function (item) {
-              item.references = item.references.map(function (ref) {
-                return path.relative(path.join(__dirname, 'fixtures'), ref)
-                  .replace(/\\/g, '/'); // replace any Windows-style paths
-              });
-            });
-          }
-        })
-          .on('error', done)
-          .on('data', function (file) {
-            expect(file.isNull()).to.be.false;
-
-            fs.readFile(__dirname + '/fixtures/test.pot', {encoding: 'utf8'}, function (err, pot) {
-              if (err) {
-                done(err);
-                return;
-              }
-
-              expect(file.contents.toString()).to.equal(pot);
-
-              done();
-            });
-          })
-          .write(createFile(partial));
+    it('should work with a single input file', function (done) {
+      var partial = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial.html',
+        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
       });
+
+      var stream = extract({
+        postProcess: relativizeHeaders
+      });
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        expect(file.isNull()).to.be.false;
+
+        fs.readFile(__dirname + '/fixtures/test.pot', {encoding: 'utf8'}, function (err, pot) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          expect(file.contents.toString()).to.equal(pot);
+
+          done();
+        });
+      });
+      stream.write(partial);
+      stream.end();
+    });
+
+    it('should work with multiple input files', function (done) {
+      var partial1 = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial1.html',
+        contents: new Buffer('<div translate>Hello</div>')
+      });
+      var partial2 = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial2.html',
+        contents: new Buffer('<div translate>world</div>')
+      });
+
+      var stream = extract('out.pot', {
+        postProcess: relativizeHeaders
+      });
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        expect(file.isNull()).to.be.false;
+
+        fs.readFile(__dirname + '/fixtures/testmultiple.pot', {encoding: 'utf8'}, function (err, pot) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          expect(file.contents.toString()).to.equal(pot);
+
+          done();
+        });
+      });
+      stream.write(partial1);
+      stream.write(partial2);
+      stream.end();
     });
   });
 
   describe('compile()', function () {
     var createFile = function (contents) {
-      var base = path.normalize(__dirname + '/fixtures');
       return new gutil.File({
-        path: path.join(base, 'es.po'),
-        base: base,
         cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/es.po',
         contents: contents
       });
     };
@@ -76,22 +106,23 @@ describe('gulp-angular-gettext', function () {
           done(err);
           return;
         }
-        compile({
+        var stream = compile({
           format: 'json'
-        })
-          .on('error', done)
-          .on('data', function (file) {
-            expect(file.isNull()).to.be.false;
-            expect(file.contents.toString()).to.equal(JSON.stringify({
-              es: {
-                'Hello world': '¡Hola, mundo',
-                'Goodbye': 'Adios'
-              }
-            }));
+        });
+        stream.on('error', done);
+        stream.on('data', function (file) {
+          expect(file.isNull()).to.be.false;
+          expect(file.contents.toString()).to.equal(JSON.stringify({
+            es: {
+              'Hello world': '¡Hola, mundo',
+              'Goodbye': 'Adios'
+            }
+          }));
 
-            done();
-          })
-          .write(createFile(esPo));
+          done();
+        });
+        stream.write(createFile(esPo));
+        stream.end();
       });
     });
   });
