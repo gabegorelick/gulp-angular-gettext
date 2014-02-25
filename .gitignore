@@ -1,0 +1,9 @@
+node_modules
+*.iml
+*~
+\#*\#
+
+.*
+!.gitignore
+!.gitattributes
+!.jshintrc
