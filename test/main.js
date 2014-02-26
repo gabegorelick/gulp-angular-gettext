@@ -73,7 +73,7 @@ describe('gulp-angular-gettext', function () {
       stream.on('data', function (file) {
         expect(file.isNull()).to.be.false;
 
-        fs.readFile(__dirname + '/fixtures/testmultiple.pot', {encoding: 'utf8'}, function (err, pot) {
+        fs.readFile(__dirname + '/fixtures/multiple.pot', {encoding: 'utf8'}, function (err, pot) {
           if (err) {
             done(err);
             return;
@@ -86,6 +86,98 @@ describe('gulp-angular-gettext', function () {
       });
       stream.write(partial1);
       stream.write(partial2);
+      stream.end();
+    });
+
+    it('should merge duplicate strings with references', function (done) {
+      var partial1 = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial1.html',
+        contents: new Buffer('<div translate>Hello</div><div translate>Hello</div>')
+      });
+      var partial2 = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial2.html',
+        contents: new Buffer('<div translate>Hello</div><div translate>world</div>')
+      });
+
+      var stream = extract('out.pot', {
+        postProcess: relativizeHeaders
+      });
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        fs.readFile(__dirname + '/fixtures/merge-duplicates.pot', {encoding: 'utf8'}, function (err, pot) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          expect(file.contents.toString()).to.equal(pot);
+
+          done();
+        });
+      });
+      stream.write(partial1);
+      stream.write(partial2);
+      stream.end();
+    });
+
+    it('should extract plural strings', function (done) {
+      var partial1 = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial1.html',
+        contents: new Buffer('<div translate translate-n="count" translate-plural="Birds">Bird</div>')
+      });
+
+      var stream = extract('out.pot', {
+        postProcess: relativizeHeaders
+      });
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        fs.readFile(__dirname + '/fixtures/plural.pot', {encoding: 'utf8'}, function (err, pot) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          expect(file.contents.toString()).to.equal(pot);
+
+          done();
+        });
+      });
+      stream.write(partial1);
+      stream.end();
+    });
+
+    it('should merge singular and plural strings', function (done) {
+      var partial1 = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial1.html',
+        contents: new Buffer('<div translate translate-n="count" translate-plural="Birds">Bird</div>' +
+          '<div translate>Bird</div>')
+      });
+
+      var stream = extract('out.pot', {
+        postProcess: relativizeHeaders
+      });
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        fs.readFile(__dirname + '/fixtures/plural.pot', {encoding: 'utf8'}, function (err, pot) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          expect(file.contents.toString()).to.equal(pot);
+
+          done();
+        });
+      });
+      stream.write(partial1);
       stream.end();
     });
   });
