@@ -61,6 +61,75 @@ describe('gulp-angular-gettext', function () {
       });
     };
 
+    it('should work with just a string argument', function (done) {
+      var partial = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial.html',
+        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
+      });
+
+      var stream = extract('foo.bar');
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        expect(file.path).to.equal(path.join(fixturesDir, 'foo.bar'));
+
+        PO.load(__dirname + '/fixtures/test.pot', function (err, expected) {
+          if (err) {
+            done(err);
+            return;
+          }
+          var actual = PO.parse(file.contents.toString());
+
+          // clear file references that depend on abolute paths
+          var actualItems = actual.items.map(function (i) {
+            i.references = [];
+          });
+          var expectedItems = expected.items.map(function (i) {
+            i.references = [];
+          });
+
+          expect(actualItems).to.deep.equal(expectedItems);
+
+          done();
+        });
+      });
+
+      stream.write(partial);
+      stream.end();
+    });
+
+    it('should work with just an object argument', function (done) {
+      var partial = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: path.join(fixturesDir, 'partial.html'),
+        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
+      });
+
+      var stream = extract({
+        postProcess: relativizeHeaders
+      });
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        expect(file.path).to.equal(path.join(fixturesDir, 'partial.pot'));
+
+        PO.load(__dirname + '/fixtures/test.pot', function (err, expected) {
+          if (err) {
+            done(err);
+            return;
+          }
+          var actual = PO.parse(file.contents.toString());
+          expect(actual).to.deep.equal(expected);
+
+          done();
+        });
+      });
+
+      stream.write(partial);
+      stream.end();
+    });
+
     it('should work with a single input file', function (done) {
       var partial = new gutil.File({
         cwd: __dirname,
