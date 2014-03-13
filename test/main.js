@@ -7,11 +7,50 @@ var gutil = require('gulp-util');
 var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');
+var PO = require('pofile');
 
 var fixturesDir = __dirname + '/fixtures';
 
 describe('gulp-angular-gettext', function () {
   describe('extract()', function () {
+
+    it('should work with no arguments', function (done) {
+      var partial = new gutil.File({
+        cwd: __dirname,
+        base: fixturesDir,
+        path: fixturesDir + '/partial.html',
+        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
+      });
+
+      var stream = extract();
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        expect(file.path).to.equal(fixturesDir + '/partial.pot');
+
+        PO.load(__dirname + '/fixtures/test.pot', function (err, expected) {
+          if (err) {
+            done(err);
+            return;
+          }
+          var actual = PO.parse(file.contents.toString());
+
+          // clear file references that depend on abolute paths
+          var actualItems = actual.items.map(function (i) {
+            i.references = [];
+          });
+          var expectedItems = expected.items.map(function (i) {
+            i.references = [];
+          });
+
+          expect(actualItems).to.deep.equal(expectedItems);
+
+          done();
+        });
+      });
+
+      stream.write(partial);
+      stream.end();
+    });
 
     var relativizeHeaders = function (po) {
       po.items.forEach(function (item) {
