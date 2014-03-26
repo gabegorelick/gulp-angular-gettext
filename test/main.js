@@ -312,12 +312,32 @@ describe('gulp-angular-gettext', function () {
         stream.on('error', done);
         stream.on('data', function (file) {
           expect(file.isNull()).to.be.false;
+          expect(path.extname(file.path)).to.equal('.json');
           expect(file.contents.toString()).to.equal(JSON.stringify({
             es: {
               'Hello world': '¡Hola, mundo',
               'Goodbye': 'Adios'
             }
           }));
+
+          done();
+        });
+        stream.write(createFile(esPo));
+        stream.end();
+      });
+    });
+
+    // I prefer JSON, but JS is angular-gettext-tool's default
+    it('should default to javascript', function (done) {
+      fs.readFile(__dirname + '/fixtures/es.po', function (err, esPo) {
+        if (err) {
+          done(err);
+          return;
+        }
+        var stream = compile();
+        stream.on('error', done);
+        stream.on('data', function (file) {
+          expect(path.extname(file.path)).to.equal('.js');
 
           done();
         });
