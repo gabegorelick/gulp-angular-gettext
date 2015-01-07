@@ -43,6 +43,9 @@ gulp.task('translations', function () {
 * `options` - an optional object to pass to [angular-gettext-tools](https://github.com/rubenv/angular-gettext-tools)
   `Extractor`
 
-### `.compile([options])`
+### `.compile([out], [options])`
+* `out` - an optional String representing the name of the JS/JSON file to output. If this option is given, a single
+  JS/JSON file will be generated for the entire set of input files. If this option is omitted, one JS/JSON file will be
+  generated __per__ input file.
 * `options` - an optional object to pass to [angular-gettext-tools](https://github.com/rubenv/angular-gettext-tools)
   `Compiler`
