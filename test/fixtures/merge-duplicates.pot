@@ -2,12 +2,13 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
 
-#: partial1.html
-#: partial2.html
+#: partial1.html:1
+#: partial2.html:1
 msgid "Hello"
 msgstr ""
 
-#: partial2.html
+#: partial2.html:1
 msgid "world"
 msgstr ""
