@@ -10,25 +10,29 @@ var path = require('path');
 var PO = require('pofile');
 var async = require('async');
 
-var fixturesDir = __dirname + '/fixtures';
+var fixturesDir = path.join(__dirname, 'fixtures');
+
+var createFixtureFile = function(filename, content) {
+  return new gutil.File({
+    cwd: __dirname,
+    base: fixturesDir,
+    path: path.join(fixturesDir, filename),
+    contents: new Buffer(content)
+  });
+};
 
 describe('gulp-angular-gettext', function () {
   describe('extract()', function () {
 
     it('should work with no arguments', function (done) {
-      var partial = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial.html',
-        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
-      });
+      var partial = createFixtureFile('partial.html', '<div translate>Hello</div><div translate>Goodbye</div>');
 
       var stream = extract();
       stream.on('error', done);
       stream.on('data', function (file) {
-        expect(file.path).to.equal(fixturesDir + '/partial.pot');
+        expect(file.path).to.equal(path.join(fixturesDir, 'partial.pot'));
 
-        PO.load(__dirname + '/fixtures/test.pot', function (err, expected) {
+        PO.load(path.join(fixturesDir, 'test.pot'), function (err, expected) {
           if (err) {
             done(err);
             return;
@@ -53,29 +57,15 @@ describe('gulp-angular-gettext', function () {
       stream.end();
     });
 
-    var relativizeHeaders = function (po) {
-      po.items.forEach(function (item) {
-        item.references = item.references.map(function (ref) {
-          return path.relative(path.join(__dirname, 'fixtures'), ref)
-            .replace(/\\/g, '/'); // replace any Windows-style paths
-        });
-      });
-    };
-
     it('should work with just a string argument', function (done) {
-      var partial = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial.html',
-        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
-      });
+      var partial = createFixtureFile('partial.html', '<div translate>Hello</div><div translate>Goodbye</div>');
 
       var stream = extract('foo.bar');
       stream.on('error', done);
       stream.on('data', function (file) {
         expect(file.path).to.equal(path.join(fixturesDir, 'foo.bar'));
 
-        PO.load(__dirname + '/fixtures/test.pot', function (err, expected) {
+        PO.load(path.join(fixturesDir, 'test.pot'), function (err, expected) {
           if (err) {
             done(err);
             return;
@@ -101,21 +91,14 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should work with just an object argument', function (done) {
-      var partial = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: path.join(fixturesDir, 'partial.html'),
-        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
-      });
+      var partial = createFixtureFile('partial.html', '<div translate>Hello</div><div translate>Goodbye</div>');
 
-      var stream = extract({
-        postProcess: relativizeHeaders
-      });
+      var stream = extract();
       stream.on('error', done);
       stream.on('data', function (file) {
         expect(file.path).to.equal(path.join(fixturesDir, 'partial.pot'));
 
-        PO.load(__dirname + '/fixtures/test.pot', function (err, expected) {
+        PO.load(path.join(fixturesDir, 'test.pot'), function (err, expected) {
           if (err) {
             done(err);
             return;
@@ -132,21 +115,14 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should work with a single input file', function (done) {
-      var partial = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial.html',
-        contents: new Buffer('<div translate>Hello</div><div translate>Goodbye</div>')
-      });
+      var partial = createFixtureFile('partial.html', '<div translate>Hello</div><div translate>Goodbye</div>');
 
-      var stream = extract({
-        postProcess: relativizeHeaders
-      });
+      var stream = extract();
       stream.on('error', done);
       stream.on('data', function (file) {
         expect(file.isNull()).to.be.false;
 
-        fs.readFile(__dirname + '/fixtures/test.pot', {encoding: 'utf8'}, function (err, pot) {
+        fs.readFile(path.join(fixturesDir, 'test.pot'), {encoding: 'utf8'}, function (err, pot) {
           if (err) {
             done(err);
             return;
@@ -162,27 +138,15 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should work with multiple input files', function (done) {
-      var partial1 = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial1.html',
-        contents: new Buffer('<div translate>Hello</div>')
-      });
-      var partial2 = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial2.html',
-        contents: new Buffer('<div translate>world</div>')
-      });
+      var partial1 = createFixtureFile('partial1.html', '<div translate>Hello</div>');
+      var partial2 = createFixtureFile('partial2.html', '<div translate>world</div>');
 
-      var stream = extract('out.pot', {
-        postProcess: relativizeHeaders
-      });
+      var stream = extract('out.pot');
       stream.on('error', done);
       stream.on('data', function (file) {
         expect(file.isNull()).to.be.false;
 
-        fs.readFile(__dirname + '/fixtures/multiple.pot', {encoding: 'utf8'}, function (err, pot) {
+        fs.readFile(path.join(fixturesDir, 'multiple.pot'), {encoding: 'utf8'}, function (err, pot) {
           if (err) {
             done(err);
             return;
@@ -199,25 +163,13 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should merge duplicate strings with references', function (done) {
-      var partial1 = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial1.html',
-        contents: new Buffer('<div translate>Hello</div><div translate>Hello</div>')
-      });
-      var partial2 = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial2.html',
-        contents: new Buffer('<div translate>Hello</div><div translate>world</div>')
-      });
+      var partial1 = createFixtureFile('partial1.html', '<div translate>Hello</div><div translate>Hello</div>');
+      var partial2 = createFixtureFile('partial2.html', '<div translate>Hello</div><div translate>world</div>');
 
-      var stream = extract('out.pot', {
-        postProcess: relativizeHeaders
-      });
+      var stream = extract('out.pot');
       stream.on('error', done);
       stream.on('data', function (file) {
-        fs.readFile(__dirname + '/fixtures/merge-duplicates.pot', {encoding: 'utf8'}, function (err, pot) {
+        fs.readFile(path.join(fixturesDir, 'merge-duplicates.pot'), {encoding: 'utf8'}, function (err, pot) {
           if (err) {
             done(err);
             return;
@@ -234,19 +186,12 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should extract plural strings', function (done) {
-      var partial1 = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial1.html',
-        contents: new Buffer('<div translate translate-n="count" translate-plural="Birds">Bird</div>')
-      });
+      var partial1 = createFixtureFile('partial1.html', '<div translate translate-n="count" translate-plural="Birds">Bird</div>');
 
-      var stream = extract('out.pot', {
-        postProcess: relativizeHeaders
-      });
+      var stream = extract('out.pot');
       stream.on('error', done);
       stream.on('data', function (file) {
-        fs.readFile(__dirname + '/fixtures/plural.pot', {encoding: 'utf8'}, function (err, pot) {
+        fs.readFile(path.join(fixturesDir, 'plural.pot'), {encoding: 'utf8'}, function (err, pot) {
           if (err) {
             done(err);
             return;
@@ -262,20 +207,13 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should merge singular and plural strings', function (done) {
-      var partial1 = new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + '/partial1.html',
-        contents: new Buffer('<div translate translate-n="count" translate-plural="Birds">Bird</div>' +
-          '<div translate>Bird</div>')
-      });
+      var partial1 = createFixtureFile('partial1.html',
+        '<div translate translate-n="count" translate-plural="Birds">Bird</div><div translate>Bird</div>');
 
-      var stream = extract('out.pot', {
-        postProcess: relativizeHeaders
-      });
+      var stream = extract('out.pot');
       stream.on('error', done);
       stream.on('data', function (file) {
-        fs.readFile(__dirname + '/fixtures/plural.pot', {encoding: 'utf8'}, function (err, pot) {
+        fs.readFile(path.join(fixturesDir, 'plural.pot'), {encoding: 'utf8'}, function (err, pot) {
           if (err) {
             done(err);
             return;
@@ -292,17 +230,8 @@ describe('gulp-angular-gettext', function () {
   });
 
   describe('compile()', function () {
-    var createFile = function (filename, contents) {
-      return new gutil.File({
-        cwd: __dirname,
-        base: fixturesDir,
-        path: fixturesDir + filename,
-        contents: contents
-      });
-    };
-
     it('should match es.po', function (done) {
-      fs.readFile(__dirname + '/fixtures/es.po', function (err, esPo) {
+      fs.readFile(path.join(fixturesDir, 'es.po'), function (err, esPo) {
         if (err) {
           done(err);
           return;
@@ -323,14 +252,14 @@ describe('gulp-angular-gettext', function () {
 
           done();
         });
-        stream.write(createFile('es.po', esPo));
+        stream.write(createFixtureFile('es.po', esPo));
         stream.end();
       });
     });
 
     // I prefer JSON, but JS is angular-gettext-tool's default
     it('should default to javascript', function (done) {
-      fs.readFile(__dirname + '/fixtures/es.po', function (err, esPo) {
+      fs.readFile(path.join(fixturesDir, 'es.po'), function (err, esPo) {
         if (err) {
           done(err);
           return;
@@ -342,7 +271,7 @@ describe('gulp-angular-gettext', function () {
 
           done();
         });
-        stream.write(createFile('es.po', esPo));
+        stream.write(createFixtureFile('es.po', esPo));
         stream.end();
       });
     });
@@ -351,11 +280,11 @@ describe('gulp-angular-gettext', function () {
       var poFiles = [];
 
       async.eachSeries(
-        [__dirname + '/fixtures/fr.po', __dirname + '/fixtures/es.po'],
+        [path.join(fixturesDir, 'fr.po'), path.join(fixturesDir, 'es.po')],
         function(filename, cb) {
           fs.readFile(filename, function(err, content) {
             if (!err) {
-              poFiles.push(createFile(path.basename(filename), content));
+              poFiles.push(createFixtureFile(path.basename(filename), content));
             }
             cb(err);
           });

@@ -12,11 +12,11 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "Language: fr\n"
 
-#: foo.html
+#: foo.html:1
 msgid "Hello world"
 msgstr "Bonjour monde"
 
-#: bar.html
+#: bar.html:1
 msgid "Goodbye"
 msgstr "Au revoir"
 
