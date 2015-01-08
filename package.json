@@ -25,14 +25,15 @@
   ],
   "main": "index.js",
   "dependencies": {
-    "through2": "~0.4.1",
-    "gulp-util": "~2.2.14",
-    "angular-gettext-tools": "~1.0.0",
-    "lodash.isstring": "~2.4.1"
+    "through2": "~0.6",
+    "gulp-util": "~3",
+    "angular-gettext-tools": "~2",
+    "lodash.isstring": "~2"
   },
   "devDependencies": {
-    "mocha": "~1.17.1",
-    "chai": "~1.9.0",
-    "pofile": "~0.2.7"
+    "async": "~0.9",
+    "chai": "~1",
+    "mocha": "~2",
+    "pofile": "~0.2"
   }
 }
