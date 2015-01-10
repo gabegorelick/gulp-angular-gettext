@@ -1,18 +1,18 @@
 # [gulp](http://gulpjs.com)-angular-gettext
 
-> Extract/compile translatable strings using [angular-gettext](http://angular-gettext.rocketeer.be)
+> Extract and compile translatable strings using [angular-gettext](http://angular-gettext.rocketeer.be)
 
 ## Install
 
 Install with [npm](https://npmjs.org/package/gulp-angular-gettext)
 
-```
+```sh
 npm install --save-dev gulp-angular-gettext
 ```
 
 ## Example
 
-```
+```js
 var gulp = require('gulp');
 var gettext = require('gulp-angular-gettext');
 
