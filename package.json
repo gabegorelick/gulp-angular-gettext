@@ -27,7 +27,7 @@
   "dependencies": {
     "through2": "~0.4.1",
     "gulp-util": "~2.2.14",
-    "angular-gettext-tools": "~1.0.0",
+    "angular-gettext-tools": "^2.0.1",
     "lodash.isstring": "~2.4.1"
   },
   "devDependencies": {
