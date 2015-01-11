@@ -5,6 +5,7 @@ node_modules
 \#*\#
 
 .*
+!.editorconfig
 !.gitignore
 !.gitattributes
 !.jshintrc

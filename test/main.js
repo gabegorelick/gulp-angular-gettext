@@ -8,6 +8,7 @@ var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');
 var PO = require('pofile');
+var async = require('async');
 
 var fixturesDir = __dirname + '/fixtures';
 
@@ -291,11 +292,11 @@ describe('gulp-angular-gettext', function () {
   });
 
   describe('compile()', function () {
-    var createFile = function (contents) {
+    var createFile = function (filename, contents) {
       return new gutil.File({
         cwd: __dirname,
         base: fixturesDir,
-        path: fixturesDir + '/es.po',
+        path: fixturesDir + filename,
         contents: contents
       });
     };
@@ -322,7 +323,7 @@ describe('gulp-angular-gettext', function () {
 
           done();
         });
-        stream.write(createFile(esPo));
+        stream.write(createFile('es.po', esPo));
         stream.end();
       });
     });
@@ -341,9 +342,95 @@ describe('gulp-angular-gettext', function () {
 
           done();
         });
-        stream.write(createFile(esPo));
+        stream.write(createFile('es.po', esPo));
         stream.end();
       });
     });
+
+    it('should output multiple languages to a single stream (json)', function (done) {
+      var poFiles = [];
+
+      async.eachSeries(
+        [__dirname + '/fixtures/fr.po', __dirname + '/fixtures/es.po'],
+        function(filename, cb) {
+          fs.readFile(filename, function(err, content) {
+            if (!err) {
+              poFiles.push(createFile(path.basename(filename), content));
+            }
+            cb(err);
+          });
+        },
+        function(err) {
+          if (err) {
+            done(err);
+            return;
+          }
+          var jsonStream = compile('i18n.json', {
+            format: 'json'
+          });
+          jsonStream.on('error', done);
+          jsonStream.on('data', function (file) {
+            expect(file.isNull()).to.be.false;
+            expect(path.basename(file.path)).to.equal('i18n.json');
+            expect(file.contents.toString()).to.equal(JSON.stringify({
+              fr: {
+              'Hello world': 'Bonjour monde',
+                'Goodbye': 'Au revoir'
+              },
+              es: {
+                'Hello world': '¡Hola, mundo',
+                'Goodbye': 'Adios'
+              }
+            }));
+
+            done();
+          });
+          poFiles.forEach(function(poFile) {
+            jsonStream.write(poFile);
+          });
+          jsonStream.end();
+        }
+      );
+    });
+
+    it('should output multiple languages to a single stream (javascript)', function (done) {
+      var poFiles = [];
+
+      async.eachSeries(
+        [__dirname + '/fixtures/fr.po', __dirname + '/fixtures/es.po'],
+        function(filename, cb) {
+          fs.readFile(filename, function(err, content) {
+            if (!err) {
+              poFiles.push(createFile(path.basename(filename), content));
+            }
+            cb(err);
+          });
+        },
+        function(err) {
+          if (err) {
+            done(err);
+            return;
+          }
+          var jsonStream = compile('i18n.js', {
+            format: 'javascript'
+          });
+          jsonStream.on('error', done);
+          jsonStream.on('data', function (file) {
+            expect(file.isNull()).to.be.false;
+            expect(path.basename(file.path)).to.equal('i18n.js');
+            expect(file.contents.toString()).to.match(/gettextCatalog.setStrings\(["']es["']/);
+            expect(file.contents.toString()).to.match(/gettextCatalog.setStrings\(["']fr["']/);
+
+            done();
+          });
+          poFiles.forEach(function(poFile) {
+            jsonStream.write(poFile);
+          });
+          jsonStream.end();
+        }
+      );
+
+    });
+
   });
 });
