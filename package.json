@@ -1,6 +1,6 @@
 {
   "name": "gulp-angular-gettext",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Gulp plugin for extracting/compiling angular-gettext strings",
   "license": "MIT",
   "repository": "gabegorelick/gulp-angular-gettext",
