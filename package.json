@@ -31,8 +31,9 @@
     "lodash.isstring": "~2.4.1"
   },
   "devDependencies": {
-    "mocha": "^2.1.0",
+    "async": "^0.9.0",
     "chai": "^1.10.0",
+    "mocha": "^2.1.0",
     "pofile": "~0.2.7"
   }
 }

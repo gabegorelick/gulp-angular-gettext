@@ -10,13 +10,13 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "X-Generator: Poedit 1.6.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"Language: es\n"
+"Language: fr\n"
 
 #: foo.html:1
 msgid "Hello world"
-msgstr "¡Hola, mundo"
+msgstr "Bonjour monde"
 
 #: bar.html:1
 msgid "Goodbye"
-msgstr "Adios"
+msgstr "Au revoir"
 
