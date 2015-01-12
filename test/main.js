@@ -271,9 +271,7 @@ describe('gulp-angular-gettext', function () {
           done(err);
           return;
         }
-        var stream = compile({
-          format: 'json'
-        });
+        var stream = compile();
         stream.on('error', done);
         stream.on('data', function (file) {
           expect(file.isNull()).to.be.false;
@@ -292,14 +290,32 @@ describe('gulp-angular-gettext', function () {
       });
     });
 
-    // I prefer JSON, but JS is angular-gettext-tool's default
-    it('should default to javascript', function (done) {
+    // JSON is convenient in a gulp pipeline, but JS is angular-gettext-tool's default
+    it('should default to json', function (done) {
       fs.readFile(path.join(fixturesDir, 'es.po'), function (err, esPo) {
         if (err) {
           done(err);
           return;
         }
         var stream = compile();
+        stream.on('error', done);
+        stream.on('data', function (file) {
+          expect(path.extname(file.path)).to.equal('.json');
+
+          done();
+        });
+        stream.write(createFixtureFile('es.po', esPo));
+        stream.end();
+      });
+    });
+
+    it('should generates javascript if format=javascript', function (done) {
+      fs.readFile(path.join(fixturesDir, 'es.po'), function (err, esPo) {
+        if (err) {
+          done(err);
+          return;
+        }
+        var stream = compile({format:'javascript'});
         stream.on('error', done);
         stream.on('data', function (file) {
           expect(path.extname(file.path)).to.equal('.js');
