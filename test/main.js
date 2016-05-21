@@ -1,5 +1,4 @@
 'use strict';
-/*jshint expr: true */
 
 var compile = require('../').compile;
 var extract = require('../').extract;
@@ -12,7 +11,7 @@ var PO = require('pofile');
 var fixturesDir = path.join(__dirname, 'fixtures');
 var anotherDir = path.join(__dirname, 'another');
 
-var createFixtureFile = function(filename, content) {
+var createFixtureFile = function (filename, content) {
   return new gutil.File({
     cwd: __dirname,
     base: fixturesDir,
@@ -281,7 +280,7 @@ describe('gulp-angular-gettext', function () {
           expect(file.contents.toString()).to.equal(JSON.stringify({
             es: {
               'Hello world': '¡Hola, mundo',
-              'Goodbye': 'Adios'
+              Goodbye: 'Adios'
             }
           }));
 
