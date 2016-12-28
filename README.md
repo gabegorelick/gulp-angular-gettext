@@ -25,7 +25,7 @@ gulp.task('pot', function () {
 });
 
 gulp.task('translations', function () {
-	return gulp.src('po/**/*.po')
+	return gulp.src('po/**/*.pot')
 		.pipe(gettext.compile({
 		    // options to pass to angular-gettext-tools...
 		    format: 'json'
