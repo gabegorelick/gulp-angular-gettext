@@ -186,6 +186,13 @@ describe('gulp-angular-gettext', function () {
             return;
           }
 
+          if (process.platform === 'win32') {
+            // Replace Unix path separators (i.e. '/') with Windows path separators (i.e. '\\') in pot fixture
+            pot = pot.split('\n').map(function (line) {
+              return /^#: /.test(line) ? line.replace(/\//g, '\\') : line;
+            }).join('\n');
+          }
+
           expect(file.contents.toString()).to.equal(pot);
 
           done();
