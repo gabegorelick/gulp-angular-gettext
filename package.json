@@ -27,7 +27,8 @@
   "main": "index.js",
   "dependencies": {
     "through2": "^2.0.1",
-    "gulp-util": "^3.0.7",
+    "vinyl": "^2.2.0",
+    "plugin-error": "^1.0.1",
     "angular-gettext-tools": "^2.2.0",
     "lodash.isstring": "^4.17.5"
   },
