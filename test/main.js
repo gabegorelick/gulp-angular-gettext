@@ -113,6 +113,50 @@ describe('gulp-angular-gettext', function () {
       stream.end();
     });
 
+    it('should output multiple POTs if no ouput file', function (done) {
+      var partial1 = createFixtureFile('partial1.html', '<div translate>Hello</div>');
+      var partial2 = createFixtureFile('partial2.html', '<div translate>world</div>');
+
+      PO.load(path.join(fixturesDir, 'partial1.pot'), function (err, expected1) {
+        if (err) {
+          done(err);
+          return;
+        }
+
+        PO.load(path.join(fixturesDir, 'partial2.pot'), function (err, expected2) {
+          if (err) {
+            done(err);
+            return;
+          }
+
+          var stream = extract();
+          stream.on('error', done);
+
+          var callCount = 0;
+          stream.on('data', function (file) {
+            callCount++;
+            expect(callCount).to.be.gte(1)
+              .and.to.be.lte(2);
+
+            if (callCount === 1) {
+              expect(file.path).to.equal(path.join(fixturesDir, 'partial1.pot'));
+              expect(PO.parse(file.contents.toString())).to.deep.equal(expected1);
+              return;
+            }
+
+            expect(file.path).to.equal(path.join(fixturesDir, 'partial2.pot'));
+            expect(PO.parse(file.contents.toString())).to.deep.equal(expected2);
+
+            done();
+          });
+
+          stream.write(partial1);
+          stream.write(partial2);
+          stream.end();
+        });
+      });
+    });
+
     it('should work with a single input file', function (done) {
       var partial = createFixtureFile('partial.html', '<div translate>Hello</div><div translate>Goodbye</div>');
 
