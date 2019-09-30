@@ -2,7 +2,7 @@
 
 var compile = require('../').compile;
 var extract = require('../').extract;
-var gutil = require('gulp-util');
+var Vinyl = require('vinyl');
 var expect = require('chai').expect;
 var fs = require('fs');
 var path = require('path');
@@ -12,7 +12,7 @@ var fixturesDir = path.join(__dirname, 'fixtures');
 var anotherDir = path.join(__dirname, 'another');
 
 var createFixtureFile = function (filename, content) {
-  return new gutil.File({
+  return new Vinyl({
     cwd: __dirname,
     base: fixturesDir,
     path: path.join(fixturesDir, filename),
@@ -162,13 +162,13 @@ describe('gulp-angular-gettext', function () {
     });
 
     it('should support relative paths properly', function (done) {
-      var partial1 = new gutil.File({
+      var partial1 = new Vinyl({
         cwd: __dirname,
         base: anotherDir,
         path: path.join(fixturesDir, 'partial1.html'),
         contents: new Buffer('<div translate>Hello</div>')
       });
-      var partial2 = new gutil.File({
+      var partial2 = new Vinyl({
         cwd: __dirname,
         base: anotherDir,
         path: path.join(fixturesDir, 'partial2.html'),
