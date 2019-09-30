@@ -161,6 +161,20 @@ describe('gulp-angular-gettext', function () {
       stream.end();
     });
 
+    it('should work with no input files', function (done) {
+      var files = [];
+      var stream = extract('out.pot');
+      stream.on('error', done);
+      stream.on('data', function (file) {
+        files.push(file);
+      });
+      stream.on('end', function () {
+        expect(files.length).to.equal(0);
+        done();
+      });
+      stream.end();
+    });
+
     it('should support relative paths properly', function (done) {
       var partial1 = new Vinyl({
         cwd: __dirname,
