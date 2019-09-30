@@ -32,9 +32,9 @@
     "vinyl": "^2.2.0"
   },
   "devDependencies": {
-    "chai": "^3.5.0",
-    "eslint": "^2.10.2",
-    "mocha": "^2.4.5",
-    "pofile": "^1.0.2"
+    "chai": "^4.2.0",
+    "eslint": "^6.5.0",
+    "mocha": "^6.2.1",
+    "pofile": "^1.1.0"
   }
 }
