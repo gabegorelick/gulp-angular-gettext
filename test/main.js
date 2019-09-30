@@ -16,7 +16,7 @@ var createFixtureFile = function (filename, content) {
     cwd: __dirname,
     base: fixturesDir,
     path: path.join(fixturesDir, filename),
-    contents: new Buffer(content)
+    contents: Buffer.from(content)
   });
 };
 
@@ -166,13 +166,13 @@ describe('gulp-angular-gettext', function () {
         cwd: __dirname,
         base: anotherDir,
         path: path.join(fixturesDir, 'partial1.html'),
-        contents: new Buffer('<div translate>Hello</div>')
+        contents: Buffer.from('<div translate>Hello</div>')
       });
       var partial2 = new Vinyl({
         cwd: __dirname,
         base: anotherDir,
         path: path.join(fixturesDir, 'partial2.html'),
-        contents: new Buffer('<div translate>world</div>')
+        contents: Buffer.from('<div translate>world</div>')
       });
 
       var stream = extract('out.pot');
